@@ -1,13 +1,19 @@
 package edu.knoldus
 
 import java.util.Properties
+
+import edu.knoldus.KafkaScalaConsumer.getClass
 import org.apache.kafka.clients.producer.{KafkaProducer, ProducerRecord}
+import org.slf4j.{Logger, LoggerFactory}
+
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.{Failure, Success}
 
 object KafkaScalaProducer extends App {
 
   val props = new Properties()
+  val logger: Logger = LoggerFactory.getLogger(getClass.getName)
+
 
   /**
     * bootstrap.servers
@@ -87,14 +93,14 @@ object KafkaScalaProducer extends App {
     */
   val topic = "kafka-topic-kip"
 
-  println(s"Sending Records in Kafka Topic [$topic]")
+  logger.info(s"Sending Records in Kafka Topic [$topic]")
 
   val twitterApp = new TwitterApp
   val userStatuses = twitterApp.getUserStatuses("TheSassyGourmet")
   userStatuses onComplete{
-    case Success(statuses) => println("-------------------------statuses = " + statuses)
+    case Success(statuses) => logger.info("-------------------------statuses = " + statuses)
       statuses.map(status => producer.send(new ProducerRecord[Nothing, String](topic, status)))
-    case Failure(error) => println("Error getting feed " + error.getMessage)
+    case Failure(error) => logger.info("Error getting feed " + error.getMessage)
   }
 
   /**
